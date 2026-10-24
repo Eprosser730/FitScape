@@ -10,6 +10,7 @@
 	"grants": [
 		// Owner and admins: everything (all devices, the 192.168.68.0/24 subnet route, the exit node).
 		{"src": ["autogroup:owner", "autogroup:admin"], "dst": ["*"], "ip": ["*"]},
+		{"src": ["autogroup:owner", "autogroup:admin"], "dst": ["autogroup:internet"], "ip": ["*"]},
 
 		// Guests (invited members, or people a device was shared with): the FitScape site only.
 		// No Postgres (5432), no Proxmox UI, no home LAN, no exit node.
