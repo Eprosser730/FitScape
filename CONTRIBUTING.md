@@ -10,7 +10,7 @@ Give it a type label (`feat`, `fix`, `docs`, …), an area label if relevant (`a
 
 ## 2. Branch
 
-```
+```text
 <type>/<issue-number>-<short-name>
 ```
 
@@ -27,7 +27,7 @@ git switch -c feat/12-signin-page
 
 We use [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>: <short summary in present tense>
 
 <optional body: what and why, not how>

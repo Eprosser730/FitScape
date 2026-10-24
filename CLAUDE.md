@@ -4,6 +4,7 @@ FitScape is an Old School RuneScape-inspired goal tracker: users log activities,
 It's a **learning project**. Explain what you're doing and why, in plain language, as you go.
 
 ## Workflow (non-negotiable)
+
 - Follow [CONTRIBUTING.md](CONTRIBUTING.md): issue → branch `type/<issue>-name` → Conventional Commits → PR → squash merge.
 - `main` is protected. Never try to push to it directly or bypass the ruleset.
 - One concern per PR. Unrelated findings become new issues.
@@ -11,12 +12,15 @@ It's a **learning project**. Explain what you're doing and why, in plain languag
 - Record significant decisions as ADRs in `docs/adr/`.
 
 ## Stack
+
 See [ADR 0002](docs/adr/0002-tech-stack.md) and [ADR 0003](docs/adr/0003-hosting-and-environments.md).
+
 - `backend/`: FastAPI, SQLAlchemy 2, Alembic, Postgres 17 (managed with uv)
 - `frontend/`: React + TypeScript + Vite
 - `infra/`: Docker Compose for the homelab
 
 ## Rules
+
 - **Never commit secrets.** Use `.env` (gitignored) and keep `.env.example` up to date.
 - Never run destructive SQL against `fitscape_prod`. Use `fitscape_dev` or `fitscape_test`.
 - Auth follows [ADR 0004](docs/adr/0004-username-pin-authentication.md). Changes to it need a new ADR and a security review.

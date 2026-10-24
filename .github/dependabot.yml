@@ -1,0 +1,22 @@
+# Weekly PRs that bump pinned versions. Security alerts are separate and always on.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    labels: [ci]
+
+  - package-ecosystem: docker-compose
+    directory: /infra
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    labels: [chore, area:infra]
+    ignore:
+      # A Postgres major upgrade needs a dump/restore (see docs/runbooks/homelab.md), so never auto-propose one.
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]

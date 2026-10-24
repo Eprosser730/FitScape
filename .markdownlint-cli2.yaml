@@ -1,0 +1,8 @@
+# Markdown lint config (used by CI and `npx markdownlint-cli2`).
+config:
+  default: true
+  MD013: false # line length: prose is written one sentence per line, wrapping adds churn
+  MD060: false # table pipe spacing: cosmetic only
+ignores:
+  - "**/node_modules/**"
+  - "graphify-out/**"
