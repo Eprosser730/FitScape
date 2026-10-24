@@ -44,6 +44,13 @@ describe('SignIn', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Too many wrong PINs')
   })
 
+  it('explains the per-device limit', async () => {
+    mockApi({ status: 429, body: { code: 'too_many_attempts', retry_after: 610 } })
+    renderAt('/signin')
+    await signIn()
+    expect(await screen.findByRole('alert')).toHaveTextContent('from this device. Try again in 11 min.')
+  })
+
   it('switches to sign-up for an unknown username and creates the account', async () => {
     const fetchMock = mockApi(
       { status: 404, body: { code: 'user_not_found' } },
