@@ -55,6 +55,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgb(214 173 92 / 0.2);
 }
 textarea { resize: vertical; min-height: 120px; }
+/* Our own chevron: Safari's native select ignores the theme and can hide the chosen text. */
+select {
+  appearance: none; -webkit-appearance: none; padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238d96a3' stroke-width='1.6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 11px center;
+}
 button {
   font: inherit; font-weight: 600; padding: 9px 16px; border-radius: var(--radius-sm); cursor: pointer;
   color: var(--on-accent); background: var(--accent); border: 1px solid var(--accent);
@@ -383,7 +389,32 @@ button.danger:hover { background: #c95447; border-color: #c95447; }
 .row-actions { display: inline-flex; gap: 6px; }
 
 @media (max-width: 560px) {
-  .mileage { grid-template-columns: 1fr 1fr; }
-  .mileage-card.current strong { font-size: 2rem; }
-  .interval-row { grid-template-columns: 24px 1fr minmax(0, 60px) auto minmax(0, 60px) auto auto; }
+  .mileage { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mileage-card { padding: 14px; }
+  .mileage-card strong { font-size: 1.5rem; }
+  .mileage-card.current strong { font-size: 1.9rem; }
+  /* Two lines on phones: [# Run/Walk ×] then [min sec], so the picker isn't squeezed to nothing. */
+  .interval-row { grid-template-columns: 24px minmax(0, 1fr) auto minmax(0, 1fr) auto auto; row-gap: 8px; }
+  .interval-row select { grid-column: 2 / 6; grid-row: 1; }
+  .interval-row .icon-btn { grid-column: 6; grid-row: 1; }
+  .interval-row input:nth-of-type(1) { grid-column: 2; grid-row: 2; }
+  .interval-row span:nth-of-type(2) { grid-column: 3; grid-row: 2; }
+  .interval-row input:nth-of-type(2) { grid-column: 4; grid-row: 2; }
+  .interval-row span:nth-of-type(3) { grid-column: 5; grid-row: 2; }
+  .run-table { font-size: 0.85rem; }
+  .run-table th, .run-table td { padding: 9px 10px; }
+  .run-table .notes-cell { min-width: 140px; }
+}
+
+/* --- Touch screens (iPhone first): finger-sized targets, no zoom-on-tap --- */
+@media (pointer: coarse) {
+  /* Safari zooms the whole page when you tap a field whose text is under 16px. */
+  input, select, textarea { font-size: 16px; }
+  button, .tab, .small-btn { min-height: 44px; }
+  .brand, .topbar nav a { min-height: 44px; display: inline-flex; align-items: center; }
+  .run-table thead th { padding-block: 0; vertical-align: middle; }
+  .sort { min-height: 44px; display: inline-flex; align-items: center; }
+  .switch input { width: 46px; height: 28px; }
+  .switch input::after { width: 22px; height: 22px; }
+  .switch input:checked::after { transform: translateX(18px); }
 }

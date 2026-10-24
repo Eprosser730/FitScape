@@ -46,6 +46,10 @@ test('five wrong PINs lock the account', async ({ page }) => {
   const username = unique()
   await signUp(page, username, '4826')
   await page.getByRole('button', { name: 'Log out' }).click()
+  // Every browser project shares one test server; give this test its own "device", so its
+  // deliberate wrong PINs don't use up the per-device budget (ADR 0005) for the other tests.
+  // (In prod nginx overwrites X-Real-IP; the dev server passes it straight through.)
+  await page.setExtraHTTPHeaders({ 'X-Real-IP': `e2e-${username}` })
 
   for (const left of [4, 3, 2, 1]) {
     await signIn(page, username, '9135')
