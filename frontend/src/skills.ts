@@ -2,7 +2,7 @@
 export type Skill = { name: string; osrs: string; icon: string; path?: string }
 
 export const SKILLS: Skill[] = [
-  { name: 'Running', osrs: 'Agility', icon: '/icons/agility.png' },
+  { name: 'Running', osrs: 'Agility', icon: '/icons/agility.png', path: '/skills/running' },
   { name: 'Food', osrs: 'Cooking', icon: '/icons/cooking.png' },
   // Water has no obvious OSRS skill; Fishing is a provisional pick, easy to swap.
   { name: 'Water', osrs: 'Fishing', icon: '/icons/fishing.png' },
