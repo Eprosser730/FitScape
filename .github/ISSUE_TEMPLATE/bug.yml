@@ -1,0 +1,31 @@
+name: Bug
+description: Something isn't working as expected
+labels: ["fix"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include exact error text if there is any.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Browser/device, local dev or homelab, commit or version.
