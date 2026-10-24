@@ -31,3 +31,7 @@ build/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Playwright
+playwright-report/
+test-results/
