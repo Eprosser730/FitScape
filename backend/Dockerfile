@@ -18,5 +18,5 @@ USER fitscape
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
-# Apply any new migrations, then serve. --proxy-headers trusts X-Forwarded-* from nginx.
-CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"]
+# Apply any new migrations, then serve.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

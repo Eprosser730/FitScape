@@ -100,7 +100,9 @@ curl -s http://192.168.68.15/api/health    # {"status":"ok"}
 ```
 
 - **First time only:** add `PIN_PEPPER` to `infra/.env` (`openssl rand -hex 32`). **Never change or lose it**: every existing PIN would stop working. Keep a copy somewhere safe (e.g. your password manager).
-- **Roll back:** `git switch --detach <previous commit>` then `docker compose up -d --build`. A release that added a migration also needs `docker compose exec api alembic downgrade -1` first (check the migration's `downgrade()`).
+- **Roll back:** `git switch --detach <previous commit>` then `docker compose up -d --build`.
+  If the release added a migration, undo it **before** switching, and take a dump first, because `downgrade()` usually drops the new columns or tables and their data:
+  `docker compose exec -T db pg_dump -U postgres fitscape_prod > /root/pre-rollback-$(date +%F).sql`, then `docker compose exec api alembic downgrade -1`.
 - **Logs:** `docker compose logs -f api web`.
 - The site is plain HTTP for now, so `COOKIE_SECURE` is `false`. When HTTPS is added (e.g. `tailscale serve`), set it to `true` in `docker-compose.yml`.
 
