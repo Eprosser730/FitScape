@@ -19,6 +19,9 @@ async function signUp(page: Page, username: string, pin: string) {
   await page.getByLabel('Choose a 4-digit PIN').fill(pin)
   await page.getByLabel('Confirm PIN').fill(pin)
   await page.getByRole('button', { name: 'Create account' }).click()
+  // New accounts land on the profile page first; skipping it goes to the dashboard.
+  await expect(page.getByRole('heading', { name: 'Tell us about you' })).toBeVisible()
+  await page.getByRole('link', { name: 'Skip for now' }).click()
   await expect(page.getByRole('heading', { name: 'Welcome, Test' })).toBeVisible()
 }
 
@@ -59,4 +62,21 @@ test('five wrong PINs lock the account', async ({ page }) => {
   await page.getByLabel('PIN', { exact: true }).clear()
   await signIn(page, username, '4826') // the right PIN is refused while locked
   await expect(page.getByRole('alert')).toContainText('Too many wrong PINs')
+})
+
+test('profile saves and shows a BMI', async ({ page }) => {
+  await signUp(page, unique(), '4826')
+  await page.getByRole('link', { name: 'Profile' }).click()
+  await page.getByLabel('Gender').selectOption('female')
+  await page.getByLabel('Age').fill('30')
+  await page.getByLabel('Feet').fill('5')
+  await page.getByLabel('Inches').fill('4')
+  await page.getByLabel('Weight (lb)').fill('120')
+  await page.getByRole('button', { name: 'Save profile' }).click()
+  await expect(page.getByText('20.6')).toBeVisible()
+  await expect(page.getByText('Healthy weight')).toBeVisible()
+
+  await page.reload() // saved on the server, not just in the page
+  await expect(page.getByLabel('Age')).toHaveValue('30')
+  await expect(page.getByText('20.6')).toBeVisible()
 })

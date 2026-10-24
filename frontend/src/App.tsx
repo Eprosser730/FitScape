@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import AppLayout from './components/AppLayout'
 import Dashboard from './pages/Dashboard'
+import Profile from './pages/Profile'
 import SignIn from './pages/SignIn'
 
 /** All routes, shared by the app and the tests. */
@@ -10,6 +11,7 @@ export function AppRoutes() {
       <Route path="/signin" element={<SignIn />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

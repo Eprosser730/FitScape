@@ -128,3 +128,34 @@ main.auth { max-width: 380px; padding-top: 12vh; }
   .topbar-user span { display: none; }
   main { padding: 24px 16px 40px; }
 }
+
+/* --- Pages --- */
+.page-header { display: grid; gap: 4px; margin-bottom: 24px; }
+.small { font-size: 0.82rem; }
+.success { color: var(--success); }
+.form-actions { display: flex; align-items: center; gap: 16px; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+legend { font-weight: 550; font-size: 0.9rem; margin-bottom: 6px; padding: 0; }
+.inline-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.inline-fields label { font-weight: 450; color: var(--muted); }
+
+/* --- Profile --- */
+.profile-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.bmi { display: grid; gap: 12px; }
+.bmi-value { display: flex; align-items: baseline; gap: 12px; }
+.bmi-value strong { font-size: 2.6rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1; }
+.bmi-value span { font-weight: 600; }
+.bmi-scale {
+  position: relative; height: 8px; border-radius: 999px;
+  /* Zone widths match the CDC cut-offs on a 15 to 40 scale: 18.5, 25, 30. */
+  background: linear-gradient(90deg, #5b8def 0 14%, #6fbf73 14% 40%, #d6ad5c 40% 60%, #e07a6b 60% 100%);
+}
+.bmi-marker {
+  position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); border: 3px solid var(--bg); transform: translate(-50%, -50%);
+}
+.bmi-legend { display: grid; grid-template-columns: 14fr 26fr 20fr 40fr; font-size: 0.75rem; }
+
+@media (max-width: 720px) {
+  .profile-grid { grid-template-columns: 1fr; }
+}

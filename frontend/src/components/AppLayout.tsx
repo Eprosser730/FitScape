@@ -56,6 +56,7 @@ export default function AppLayout() {
           <NavLink to="/" end>
             Dashboard
           </NavLink>
+          <NavLink to="/profile">Profile</NavLink>
         </nav>
         <div className="topbar-user">
           <span className="muted">{user.first_name}</span>

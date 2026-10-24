@@ -61,7 +61,7 @@ export default function SignIn() {
   async function signUp() {
     const body = { username, first_name: firstName, last_name: lastName, pin }
     const { status } = await api('/api/auth/signup', { body })
-    if (status === 201) return navigate('/')
+    if (status === 201) return navigate('/profile?welcome')
     if (status === 409) return setError('That username was just taken. Pick another.')
     if (status === 422) return setError('Check your details. Very easy PINs like 1234 are not allowed.')
     setError('Something went wrong. Try again.')
