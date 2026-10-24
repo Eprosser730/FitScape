@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mockApi, renderAt } from '../test-utils'
 
 const ME = { username: 'ethan', first_name: 'Ethan', last_name: 'Prosser' }
@@ -74,6 +74,14 @@ describe('SignIn', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
+  it('treats a 404 without user_not_found as an error, not a sign-up', async () => {
+    mockApi({ status: 404 })
+    renderAt('/signin')
+    await signIn()
+    expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong')
+    expect(screen.queryByLabelText('First name')).not.toBeInTheDocument()
+  })
+
   it('reports a taken username', async () => {
     mockApi(
       { status: 404, body: { code: 'user_not_found' } },
@@ -85,7 +93,7 @@ describe('SignIn', () => {
   })
 
   it('shows a friendly message when the server is unreachable', async () => {
-    mockApi() // nothing queued: fetch resolves undefined, so the wrapper throws like a network error
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
     renderAt('/signin')
     await signIn()
     expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach FitScape")

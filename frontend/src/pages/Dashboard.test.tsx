@@ -23,6 +23,20 @@ describe('Dashboard', () => {
     expect(await screen.findByRole('button', { name: 'Sign in' })).toBeInTheDocument()
   })
 
+  it('shows an error instead of signing out when /api/me fails', async () => {
+    mockApi({ status: 500 })
+    renderAt('/')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong')
+  })
+
+  it('stays on the dashboard and says so when logout fails', async () => {
+    mockApi({ status: 200, body: ME }, { status: 500 })
+    renderAt('/')
+    await userEvent.click(await screen.findByRole('button', { name: 'Log out' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't log out")
+    expect(screen.getByRole('heading', { name: 'Welcome, Ethan' })).toBeInTheDocument()
+  })
+
   it('logs out and returns to sign-in', async () => {
     const fetchMock = mockApi({ status: 200, body: ME }, { status: 204 })
     renderAt('/')

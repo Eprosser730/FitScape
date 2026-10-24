@@ -43,16 +43,16 @@ export default function SignIn() {
   async function signIn() {
     const { status, data } = await api<LoginError>('/api/auth/login', { body: { username, pin } })
     if (status === 200) return navigate('/')
-    if (status === 404) {
+    if (status === 404 && data?.code === 'user_not_found') {
       setMode('signup')
       setPin('')
       return
     }
     if (status === 401) {
-      const left = data.attempts_left ?? 0
+      const left = data?.attempts_left ?? 0
       return setError(`Wrong PIN. ${left} ${left === 1 ? 'attempt' : 'attempts'} left.`)
     }
-    if (status === 423) return setError(lockedMessage(data.locked_until))
+    if (status === 423) return setError(lockedMessage(data?.locked_until))
     if (status === 422) return setError('Usernames are 3–20 letters, numbers or _. PINs are 4 digits.')
     setError('Something went wrong. Try again.')
   }
@@ -87,7 +87,7 @@ export default function SignIn() {
       <h1>FitScape</h1>
       <form onSubmit={submit} aria-describedby={error ? 'form-error' : undefined}>
         {mode === 'signup' && (
-          <p className="notice" role="status">
+          <p id="signup-notice" className="notice" role="status">
             No account named <strong>{username}</strong>. Create one?
           </p>
         )}
@@ -105,7 +105,13 @@ export default function SignIn() {
           <>
             <label>
               First name
-              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required autoFocus />
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                aria-describedby="signup-notice"
+                required
+                autoFocus
+              />
             </label>
             <label>
               Last name
