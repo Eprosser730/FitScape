@@ -3,14 +3,14 @@
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, StringConstraints, field_validator
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as DbSession
 
-from app import security
+from app import ratelimit, security
 from app.config import get_settings
 from app.db import get_db
 from app.models import Session, User
@@ -95,8 +95,23 @@ def current_user(
     raise HTTPException(status.HTTP_401_UNAUTHORIZED, "not signed in")
 
 
+def _client_ip(request: Request) -> str:
+    # nginx sets X-Real-IP to the visitor's tailnet address (overwriting anything the visitor
+    # sent), and the api container is reachable only through nginx (ADR 0005).
+    return request.headers.get("x-real-ip") or (request.client.host if request.client else "?")
+
+
 @router.post("/auth/login", response_model=UserOut)
-def login(body: LoginIn, response: Response, db: DbSession = Depends(get_db)):
+def login(body: LoginIn, request: Request, response: Response, db: DbSession = Depends(get_db)):
+    client = _client_ip(request)
+    wait = ratelimit.retry_after(client)
+    if wait is not None:
+        return JSONResponse(
+            status_code=429,
+            content={"code": "too_many_attempts", "retry_after": wait},
+            headers={"Retry-After": str(wait)},
+        )
+
     # Row lock: two simultaneous guesses can't both read the same attempt count.
     user = db.scalar(select(User).where(User.username == body.username).with_for_update())
     if user is None:
@@ -107,6 +122,7 @@ def login(body: LoginIn, response: Response, db: DbSession = Depends(get_db)):
         return _error(423, "locked", locked_until=user.locked_until.isoformat())
 
     if not security.verify_pin(body.pin, user.pin_hash):
+        ratelimit.record_failure(client)
         user.failed_pin_attempts += 1
         if user.failed_pin_attempts >= security.MAX_PIN_ATTEMPTS:
             user.failed_pin_attempts = 0

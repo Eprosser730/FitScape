@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { api } from '../api'
 import { Footer } from '../components/AppLayout'
 
-type LoginError = { code?: string; attempts_left?: number; locked_until?: string }
+type LoginError = { code?: string; attempts_left?: number; locked_until?: string; retry_after?: number }
 
 function lockedMessage(lockedUntil?: string) {
   const time = lockedUntil
@@ -54,6 +54,10 @@ export default function SignIn() {
       return setError(`Wrong PIN. ${left} ${left === 1 ? 'attempt' : 'attempts'} left.`)
     }
     if (status === 423) return setError(lockedMessage(data?.locked_until))
+    if (status === 429) {
+      const minutes = Math.max(1, Math.ceil((data?.retry_after ?? 60) / 60))
+      return setError(`Too many failed sign-ins from this device. Try again in ${minutes} min.`)
+    }
     if (status === 422) return setError('Usernames are 3–20 letters, numbers or _. PINs are 4 digits.')
     setError('Something went wrong. Try again.')
   }

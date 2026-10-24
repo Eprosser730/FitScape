@@ -24,6 +24,7 @@ from alembic.config import Config  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from alembic import command  # noqa: E402
+from app import ratelimit  # noqa: E402
 from app.db import get_engine  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -38,6 +39,7 @@ def migrated_db():
 def clean_tables():
     with get_engine().begin() as conn:
         conn.execute(text("TRUNCATE sessions, users RESTART IDENTITY CASCADE"))
+    ratelimit.reset()  # every test starts with no failed sign-ins on record
 
 
 @pytest.fixture
