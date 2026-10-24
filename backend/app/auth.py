@@ -59,8 +59,13 @@ def _error(status_code: int, code: str, **extra) -> JSONResponse:
 def _start_session(db: DbSession, user: User, response: Response) -> None:
     settings = get_settings()
     token, token_hash = security.new_session_token()
-    expires = datetime.now(UTC) + timedelta(days=settings.session_days)
+    now = datetime.now(UTC)
+    expires = now + timedelta(days=settings.session_days)
+    # Tidy this user's expired sessions so the table doesn't grow forever.
+    db.execute(delete(Session).where(Session.user_id == user.id, Session.expires_at <= now))
     db.add(Session(token_hash=token_hash, user_id=user.id, expires_at=expires))
+    # Commit now: get_db's own commit runs after the response (and its cookie) is already sent.
+    db.commit()
     response.set_cookie(
         COOKIE_NAME,
         token,

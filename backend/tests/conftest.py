@@ -1,4 +1,5 @@
 import os
+import re
 from urllib.parse import urlparse
 
 import pytest
@@ -13,7 +14,8 @@ class _TestEnv(BaseSettings):
 
 _url = _TestEnv().test_database_url
 # Tests wipe every table between runs; refuse anything that isn't clearly a test database.
-assert "test" in urlparse(_url).path, f"TEST_DATABASE_URL must point at a *test* database: {_url}"
+_db_name = urlparse(_url).path.lstrip("/")
+assert re.fullmatch(r"[a-z0-9_]*_test", _db_name), f"not a *_test database: {_db_name!r}"
 os.environ["DATABASE_URL"] = _url
 os.environ.setdefault("PIN_PEPPER", "test-pepper-" + "x" * 32)
 os.environ["COOKIE_SECURE"] = "false"

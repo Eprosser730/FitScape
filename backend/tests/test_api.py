@@ -110,3 +110,11 @@ def test_expired_session_is_rejected(signed_up):
 def test_bogus_cookie_is_rejected(client):
     client.cookies.set(COOKIE_NAME, "not-a-real-token")
     assert client.get("/api/me").status_code == 401
+
+
+def test_login_purges_expired_sessions(signed_up):
+    with get_engine().begin() as conn:
+        conn.execute(update(Session).values(expires_at=datetime.now(UTC) - timedelta(seconds=1)))
+    assert login(signed_up, "4826").status_code == 200
+    with get_engine().connect() as conn:
+        assert conn.scalar(text("SELECT count(*) FROM sessions")) == 1  # old one gone, new one kept
