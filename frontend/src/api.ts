@@ -5,7 +5,7 @@ export type User = { username: string; first_name: string; last_name: string }
 
 export async function api<T = unknown>(
   path: string,
-  options: { method?: 'GET' | 'POST'; body?: unknown } = {},
+  options: { method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; body?: unknown } = {},
 ): Promise<ApiResult<T>> {
   const res = await fetch(path, {
     method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),

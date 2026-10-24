@@ -49,6 +49,7 @@ describe('SignIn', () => {
       { status: 404, body: { code: 'user_not_found' } },
       { status: 201, body: ME },
       { status: 200, body: ME },
+      { status: 404, body: { code: 'no_profile' } },
     )
     renderAt('/signin')
     const user = await signIn('newbie')
@@ -57,7 +58,8 @@ describe('SignIn', () => {
     expect(screen.getByLabelText('Username')).toHaveValue('newbie')
     await fillSignUp(user)
 
-    expect(await screen.findByRole('heading', { name: 'Welcome, Ethan' })).toBeInTheDocument()
+    // New accounts go straight to the profile page to fill in their details.
+    expect(await screen.findByRole('heading', { name: 'Tell us about you' })).toBeInTheDocument()
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
       username: 'newbie',
       first_name: 'New',

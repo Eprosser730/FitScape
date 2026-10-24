@@ -1,8 +1,9 @@
 """Database tables. Every change here needs an Alembic migration (alembic/versions)."""
 
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -35,3 +36,20 @@ class Session(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class Profile(Base):
+    """Personal details used for BMI (and, later, skill maths). One row per user."""
+
+    __tablename__ = "profiles"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    gender: Mapped[str] = mapped_column(String(20))
+    age: Mapped[int]
+    height_in: Mapped[int]  # total inches; the API speaks feet + inches
+    weight_lb: Mapped[Decimal] = mapped_column(Numeric(5, 1))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

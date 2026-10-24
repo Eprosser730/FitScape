@@ -4,11 +4,12 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app import auth
+from app import auth, profile
 from app.db import get_db
 
 app = FastAPI(title="FitScape API")
 app.include_router(auth.router)
+app.include_router(profile.router)
 
 
 @app.get("/api/health")
