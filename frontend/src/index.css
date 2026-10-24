@@ -159,3 +159,41 @@ legend { font-weight: 550; font-size: 0.9rem; margin-bottom: 6px; padding: 0; }
 @media (max-width: 720px) {
   .profile-grid { grid-template-columns: 1fr; }
 }
+
+button.danger { color: #fff; background: #b4483c; border-color: #b4483c; }
+button.danger:hover { background: #c95447; border-color: #c95447; }
+.empty { padding: 20px; border: 1px dashed var(--border-strong); border-radius: var(--radius); text-align: center; }
+
+/* --- Skill pages --- */
+.skill-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.skill-icon.large { width: 64px; height: 64px; }
+.skill-icon.large img { width: 40px; height: 40px; }
+
+/* --- Prayer journal --- */
+.journal { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
+.journal form h2 { margin-bottom: 2px; }
+.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.note { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.note[open] { border-color: var(--border-strong); }
+.note summary { list-style: none; cursor: pointer; padding: 14px 16px; display: grid; gap: 4px; }
+.note summary::-webkit-details-marker { display: none; }
+.note summary:hover { background: var(--surface-2); border-radius: var(--radius); }
+.note-meta { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.note-meta time { color: var(--accent); font-size: 0.82rem; font-weight: 600; order: 2; white-space: nowrap; }
+.note-meta strong { font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; font-weight: 600; }
+.note-preview {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: 0.9rem;
+}
+.note[open] .note-preview { display: none; }
+.note-body { padding: 0 16px 16px; display: grid; gap: 14px; }
+.note-body p {
+  white-space: pre-wrap; font-family: Georgia, "Times New Roman", serif; line-height: 1.7;
+  border-left: 2px solid var(--accent); padding-left: 14px;
+}
+.note-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.note-actions button { padding: 6px 12px; font-size: 0.85rem; }
+
+@media (max-width: 760px) {
+  .journal { grid-template-columns: 1fr; }
+}

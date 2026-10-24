@@ -80,3 +80,22 @@ test('profile saves and shows a BMI', async ({ page }) => {
   await expect(page.getByLabel('Age')).toHaveValue('30')
   await expect(page.getByText('20.6')).toBeVisible()
 })
+
+test('prayer journal: write, reload, expand, delete', async ({ page }) => {
+  await signUp(page, unique(), '4826')
+  await page.getByRole('link', { name: /Prayer & Bible/ }).click()
+  await expect(page.getByRole('heading', { name: 'Prayer & Bible' })).toBeVisible()
+  await expect(page.getByText(/No entries yet/)).toBeVisible()
+
+  await page.getByLabel('Passage').fill('Psalm 23')
+  await page.getByLabel('What did you read or pray about?').fill('The Lord is my shepherd; I shall not want.')
+  await page.getByRole('button', { name: 'Save entry' }).click()
+  await expect(page.getByText('1 entry')).toBeVisible()
+
+  await page.reload()
+  await page.getByText('Psalm 23').click() // expand the note
+  await expect(page.locator('.note-body')).toContainText('I shall not want.')
+  await page.getByRole('button', { name: 'Delete', exact: true }).click()
+  await page.getByRole('button', { name: 'Delete for good' }).click()
+  await expect(page.getByText(/No entries yet/)).toBeVisible()
+})
