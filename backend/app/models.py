@@ -102,6 +102,32 @@ class TemplateExercise(Base):
     seconds: Mapped[int | None]
 
 
+class Run(Base):
+    """One logged run: the total distance, plus optional run/walk intervals in order."""
+
+    __tablename__ = "runs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    ran_on: Mapped[date]
+    distance_mi: Mapped[Decimal] = mapped_column(Numeric(5, 2))
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    segments: Mapped[list["RunSegment"]] = relationship(
+        order_by="RunSegment.position", cascade="all, delete-orphan"
+    )
+
+
+class RunSegment(Base):
+    __tablename__ = "run_segments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), index=True)
+    position: Mapped[int]
+    kind: Mapped[str] = mapped_column(String(10))  # "run" or "walk"
+    seconds: Mapped[int]
+
+
 class Workout(Base):
     """One logged training session. Copies names and targets so template edits never rewrite it."""
 

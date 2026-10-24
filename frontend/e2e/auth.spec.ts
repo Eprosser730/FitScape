@@ -154,3 +154,21 @@ test('log a workout from a template and find it in the archive', async ({ page }
   await expect(page.getByText('10 × 185 lb')).toBeVisible()
   await expect(page.getByText('8 × 205 lb')).toBeVisible()
 })
+
+test('log a run with intervals; mileage and archive survive reload', async ({ page }) => {
+  await signUp(page, unique(), '4826')
+  await page.getByRole('link', { name: /Running/ }).click()
+  await page.getByLabel('Total distance (mi)').fill('2.5')
+  await page.getByRole('button', { name: '+ Interval' }).click()
+  await page.getByLabel('Interval 1 minutes').fill('2')
+  await page.getByRole('button', { name: '+ Interval' }).click()
+  await page.getByLabel('Notes (optional)').fill('Park loop.')
+  await page.getByRole('button', { name: 'Save run' }).click()
+
+  await expect(page.getByText('Run saved. Nice work.')).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Weekly mileage' })).toContainText('2.50 mi')
+  const row = page.getByRole('row', { name: /2\.50 mi/ })
+  await expect(row).toContainText('Run 2:00 · Walk 2:00')
+  await expect(row).toContainText('Park loop.')
+})
