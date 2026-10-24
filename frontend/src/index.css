@@ -197,3 +197,56 @@ button.danger:hover { background: #c95447; border-color: #c95447; }
 @media (max-width: 760px) {
   .journal { grid-template-columns: 1fr; }
 }
+
+/* --- Lifting: templates --- */
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.templates { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.template { display: grid; gap: 12px; align-content: start; padding: 18px; }
+.template.disabled { opacity: 0.6; }
+.template-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.template-exercises { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; counter-reset: ex; }
+.template-exercises li {
+  display: flex; justify-content: space-between; gap: 12px; font-size: 0.9rem;
+  padding: 6px 0; border-bottom: 1px dashed var(--border);
+}
+.template-exercises li:last-child { border-bottom: 0; }
+.template-exercises li span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; }
+.switch input {
+  appearance: none; width: 36px; height: 20px; border-radius: 999px; padding: 0; margin: 0; flex: none;
+  background: var(--border-strong); border: 0; position: relative; cursor: pointer; transition: background 150ms ease;
+}
+.switch input::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text); transition: transform 150ms ease;
+}
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(16px); background: var(--on-accent); }
+
+.template-editor { display: grid; gap: 18px; }
+.day-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border-strong); color: var(--muted); font-weight: 600; font-size: 0.85rem;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.exercise-rows { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
+.exercise-row {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 12px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.exercise-row label { font-weight: 450; color: var(--muted); font-size: 0.8rem; }
+.exercise-row input, .exercise-row select { background: var(--bg); }
+.exercise-row .grow { flex: 1 1 200px; }
+.exercise-row .narrow input { width: 76px; }
+.row-num {
+  align-self: center; width: 24px; height: 24px; display: grid; place-items: center; flex: none;
+  border-radius: 50%; background: var(--surface); border: 1px solid var(--border); font-size: 0.75rem; font-weight: 700; color: var(--accent);
+}
+.range { display: flex; align-items: flex-end; gap: 6px; }
+.range > span { padding-bottom: 10px; color: var(--muted); }
+.icon-btn { padding: 6px 11px; font-size: 1.1rem; line-height: 1; }

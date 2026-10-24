@@ -6,7 +6,7 @@ export const SKILLS: Skill[] = [
   { name: 'Food', osrs: 'Cooking', icon: '/icons/cooking.png' },
   // Water has no obvious OSRS skill; Fishing is a provisional pick, easy to swap.
   { name: 'Water', osrs: 'Fishing', icon: '/icons/fishing.png' },
-  { name: 'Lifting', osrs: 'Strength', icon: '/icons/strength.png' },
+  { name: 'Lifting', osrs: 'Strength', icon: '/icons/strength.png', path: '/skills/lifting' },
   { name: 'Prayer & Bible', osrs: 'Prayer', icon: '/icons/prayer.png', path: '/skills/prayer' },
   { name: 'Weight', osrs: 'Hitpoints', icon: '/icons/hitpoints.png' },
 ]

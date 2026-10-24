@@ -99,3 +99,28 @@ test('prayer journal: write, reload, expand, delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Delete for good' }).click()
   await expect(page.getByText(/No entries yet/)).toBeVisible()
 })
+
+test('lifting templates: create, switch off, survives reload', async ({ page }) => {
+  await signUp(page, unique(), '4826')
+  await page.getByRole('link', { name: /Lifting/ }).click()
+  await page.getByRole('button', { name: '+ New template' }).click()
+  await page.getByLabel('Title').fill('Push day')
+  await page.getByText('Mon', { exact: true }).click()
+  await page.getByText('Thu', { exact: true }).click()
+  await page.getByLabel('Exercise 1 name').fill('Bench press')
+  await page.getByRole('button', { name: '+ Add exercise' }).click()
+  await page.getByLabel('Exercise 2 name').fill('Plank')
+  await page.getByLabel('Type').nth(1).selectOption('seconds')
+  await page.getByLabel('Seconds').fill('60')
+  await page.getByRole('button', { name: 'Save template' }).click()
+
+  const card = page.locator('li.template', { hasText: 'Push day' })
+  await expect(card).toContainText('Mon · Thu')
+  await expect(card).toContainText('3 × 8–12 reps')
+  await expect(card).toContainText('3 × 60 s hold')
+  await card.getByRole('switch').click()
+  await expect(card).toContainText('Off')
+
+  await page.reload()
+  await expect(page.locator('li.template', { hasText: 'Push day' }).getByRole('switch')).not.toBeChecked()
+})
