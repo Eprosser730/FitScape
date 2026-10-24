@@ -1,0 +1,38 @@
+# FitScape homelab stack (runs on Proxmox CT 104 "fitscape", 192.168.68.15).
+# Usage (from this folder):  docker compose up -d
+# Secrets come from ./.env (copy .env.example, fill in real values, chmod 600).
+
+name: fitscape
+
+services:
+  db:
+    # Pinned on purpose: bump deliberately in a PR, after a backup. See docs/runbooks/homelab.md.
+    image: postgres:17.11-trixie
+    restart: unless-stopped
+    # Log every connection, so brute-force attempts show up in `docker compose logs db`.
+    command: ["postgres", "-c", "log_connections=on", "-c", "log_disconnections=on"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      # Require a password for every connection. The image's default trusts anything
+      # coming from inside the container (localhost), which silently skips password checks.
+      POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256
+      # Read by db/init/01-databases.sh, which runs once, on first start only.
+      FITSCAPE_DEV_PASSWORD: ${FITSCAPE_DEV_PASSWORD:?set in .env}
+      FITSCAPE_TEST_PASSWORD: ${FITSCAPE_TEST_PASSWORD:?set in .env}
+      FITSCAPE_PROD_PASSWORD: ${FITSCAPE_PROD_PASSWORD:?set in .env}
+      FITSCAPE_READONLY_PASSWORD: ${FITSCAPE_READONLY_PASSWORD:?set in .env}
+    ports:
+      # LAN address only (also reachable via the Tailscale subnet router), not every interface.
+      - "192.168.68.15:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
