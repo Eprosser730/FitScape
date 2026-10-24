@@ -1,0 +1,62 @@
+import { expect, test, type Page } from '@playwright/test'
+
+// Unique per run, so tests never collide with data from earlier runs.
+const unique = () => `e2e_${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`
+
+async function signIn(page: Page, username: string, pin: string) {
+  await page.getByLabel('Username').fill(username)
+  await page.getByLabel('PIN', { exact: true }).fill(pin)
+  await page.getByRole('button', { name: 'Sign in' }).click()
+}
+
+async function signUp(page: Page, username: string, pin: string) {
+  await page.goto('/')
+  await expect(page).toHaveURL(/\/signin$/)
+  await signIn(page, username, pin)
+  await expect(page.getByRole('status')).toContainText(`No account named ${username}`)
+  await page.getByLabel('First name').fill('Test')
+  await page.getByLabel('Last name').fill('Runner')
+  await page.getByLabel('Choose a 4-digit PIN').fill(pin)
+  await page.getByLabel('Confirm PIN').fill(pin)
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await expect(page.getByRole('heading', { name: 'Welcome, Test' })).toBeVisible()
+}
+
+test('sign up, log out, and sign back in', async ({ page }) => {
+  const username = unique()
+  await signUp(page, username, '4826')
+  await expect(page.getByRole('listitem')).toHaveCount(6)
+
+  await page.reload() // the session cookie keeps you signed in
+  await expect(page.getByRole('heading', { name: 'Welcome, Test' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Log out' }).click()
+  await expect(page).toHaveURL(/\/signin$/)
+  await page.goto('/')
+  await expect(page).toHaveURL(/\/signin$/) // really signed out, not just redirected once
+
+  await signIn(page, username, '4826')
+  await expect(page.getByRole('heading', { name: 'Welcome, Test' })).toBeVisible()
+})
+
+test('five wrong PINs lock the account', async ({ page }) => {
+  const username = unique()
+  await signUp(page, username, '4826')
+  await page.getByRole('button', { name: 'Log out' }).click()
+
+  for (const left of [4, 3, 2, 1]) {
+    await signIn(page, username, '9135')
+    await expect(page.getByRole('alert')).toHaveText(
+      `Wrong PIN. ${left} ${left === 1 ? 'attempt' : 'attempts'} left.`,
+    )
+    await page.getByLabel('Username').clear()
+    await page.getByLabel('PIN', { exact: true }).clear()
+  }
+  await signIn(page, username, '9135')
+  await expect(page.getByRole('alert')).toContainText('Too many wrong PINs')
+
+  await page.getByLabel('Username').clear()
+  await page.getByLabel('PIN', { exact: true }).clear()
+  await signIn(page, username, '4826') // the right PIN is refused while locked
+  await expect(page.getByRole('alert')).toContainText('Too many wrong PINs')
+})
