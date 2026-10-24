@@ -1,0 +1,18 @@
+// Tailscale access policy for the FitScape tailnet (issue #5).
+// The live copy lives in the Tailscale admin console → Access controls. Keep this file in sync:
+// edit here in a PR, then paste the whole file into the console and Save.
+{
+	// Only the tailnet owner/admins may put the fitscape tag on a device (CT 104).
+	"tagOwners": {
+		"tag:fitscape": ["autogroup:admin"],
+	},
+
+	"grants": [
+		// Owner and admins: everything (all devices, the 192.168.68.0/24 subnet route, the exit node).
+		{"src": ["autogroup:owner", "autogroup:admin"], "dst": ["*"], "ip": ["*"]},
+
+		// Guests (invited members, or people a device was shared with): the FitScape site only.
+		// No Postgres (5432), no Proxmox UI, no home LAN, no exit node.
+		{"src": ["autogroup:member", "autogroup:shared"], "dst": ["tag:fitscape"], "ip": ["tcp:443"]},
+	],
+}

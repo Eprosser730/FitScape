@@ -12,9 +12,9 @@ Where things live and how to operate them. Background: [ADR 0003](../adr/0003-ho
 | Secrets | `/opt/fitscape/infra/.env` (root-only, `chmod 600`, never committed) |
 | Database | PostgreSQL 17 (pinned version, see `infra/docker-compose.yml`), port `5432` on `192.168.68.15` only, data in Docker volume `fitscape_pgdata` |
 | Backups | Proxmox job `nightly-nas` (03:00, all guests) to the Asustor NAS |
-| App | <http://192.168.68.15> (nginx `web` container; the `api` container is internal only), uses `fitscape_prod` |
+| App | <https://fitscape.tail388788.ts.net>, tailnet only (`tailscale serve` → nginx `web` on `127.0.0.1:8080`; `api` is internal only), uses `fitscape_prod` |
 
-> ⚠️ **Don't invite guests to the tailnet yet.** The Tailscale subnet router currently exposes the whole home LAN, including port 5432, to every tailnet member. Restrict guests with Tailscale ACLs first (tracked for milestone M3).
+Guests can be invited to the tailnet: the access policy lets them reach **only** the FitScape site (see "Tailscale and HTTPS" below).
 
 ## Getting a shell
 
@@ -96,7 +96,7 @@ The `api` (FastAPI) and `web` (nginx + built React app) containers are built fro
 cd /opt/fitscape && git pull
 cd infra && docker compose up -d --build   # rebuilds only what changed; db keeps running
 docker compose ps                          # all three should be "healthy" / "running"
-curl -s http://192.168.68.15/api/health    # {"status":"ok"}
+curl -s http://127.0.0.1:8080/api/health  # {"status":"ok"}
 ```
 
 - **First time only:** add `PIN_PEPPER` to `infra/.env` (`openssl rand -hex 32`). **Never change or lose it**: every existing PIN would stop working. Keep a copy somewhere safe (e.g. your password manager).
@@ -104,7 +104,31 @@ curl -s http://192.168.68.15/api/health    # {"status":"ok"}
   If the release added a migration, undo it **before** switching, and take a dump first, because `downgrade()` usually drops the new columns or tables and their data:
   `docker compose exec -T db pg_dump -U postgres fitscape_prod > /root/pre-rollback-$(date +%F).sql`, then `docker compose exec api alembic downgrade -1`.
 - **Logs:** `docker compose logs -f api web`.
-- The site is plain HTTP for now, so `COOKIE_SECURE` is `false`. When HTTPS is added (e.g. `tailscale serve`), set it to `true` in `docker-compose.yml`.
+- Browsers only reach the app over HTTPS, so `COOKIE_SECURE` is `true` and nginx sends HSTS.
+
+## Tailscale and HTTPS
+
+CT 104 is its own tailnet device, `fitscape` (tag `tag:fitscape`), running `tailscaled` in userspace-networking mode
+(`FLAGS="--tun=userspace-networking"` in `/etc/default/tailscaled`, so the container needs no `/dev/net/tun`).
+`tailscale serve` terminates HTTPS with a MagicDNS certificate and forwards to nginx on `127.0.0.1:8080`:
+
+```bash
+tailscale serve status                          # https://fitscape.tail388788.ts.net → http://127.0.0.1:8080
+tailscale serve --bg http://127.0.0.1:8080      # (re)create it; the setting survives reboots
+```
+
+Never use `tailscale funnel`: that publishes the site to the whole internet.
+
+**Who can reach what** is set by the access policy in [`infra/tailscale/policy.hujson`](../../infra/tailscale/policy.hujson).
+Change it in a PR, then paste the whole file into the admin console → **Access controls** and Save.
+
+- Owner/admins: everything, including the `192.168.68.0/24` subnet route (DBeaver, SSH, Proxmox) and the exit node.
+- Everyone else (invited members, shared devices): `tag:fitscape` port 443 only.
+
+**Inviting a guest:** admin console → Users → Invite users (they join as **Member**), or Machines → `fitscape` → Share.
+Check from a guest device: the site loads, while `192.168.68.15:5432` and `https://192.168.68.10:8006` time out.
+
+The PC needs the Tailscale app too: the app no longer listens on the LAN.
 
 ## Danger zone
 
