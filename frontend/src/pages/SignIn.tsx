@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { api } from '../api'
+import { Footer } from '../components/AppLayout'
 
 type LoginError = { code?: string; attempts_left?: number; locked_until?: string }
 
@@ -83,9 +84,14 @@ export default function SignIn() {
   }
 
   return (
-    <main>
-      <h1>FitScape</h1>
-      <form onSubmit={submit} aria-describedby={error ? 'form-error' : undefined}>
+    <>
+    <main className="auth">
+      <h1 className="brand-title">
+        <img src="/icons/stats.png" alt="" className="pixel" />
+        FitScape
+      </h1>
+      <p className="muted tagline">Train in real life. Level up like it&apos;s Gielinor.</p>
+      <form className="card" onSubmit={submit} aria-describedby={error ? 'form-error' : undefined}>
         {mode === 'signup' && (
           <p id="signup-notice" className="notice" role="status">
             No account named <strong>{username}</strong>. Create one?
@@ -138,11 +144,13 @@ export default function SignIn() {
           {busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
         </button>
         {mode === 'signup' && (
-          <button type="button" onClick={backToSignIn}>
+          <button type="button" className="ghost" onClick={backToSignIn}>
             Back to sign in
           </button>
         )}
       </form>
     </main>
+    <Footer />
+    </>
   )
 }

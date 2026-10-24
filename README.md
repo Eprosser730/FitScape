@@ -41,3 +41,7 @@ Nothing lands on `main` without a PR. Contribution conventions will live in `CON
 ## License
 
 [MIT](LICENSE)
+
+## Credits
+
+RuneScape and its skill icons are trademarks and copyright of Jagex Ltd. FitScape is a non-commercial fan project, not affiliated with Jagex; icons come from the [OSRS Wiki](https://oldschool.runescape.wiki/).

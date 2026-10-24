@@ -12,9 +12,11 @@ describe('Dashboard', () => {
     renderAt('/')
     expect(await screen.findByRole('heading', { name: 'Welcome, Ethan' })).toBeInTheDocument()
     expect(screen.getAllByRole('listitem')).toHaveLength(SKILLS.length)
-    expect(
-      screen.getByRole('heading', { name: `Total level: ${SKILLS.length}` }),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Total level').parentElement).toHaveTextContent(`Total level${SKILLS.length}`)
+    for (const skill of SKILLS) {
+      expect(screen.getByRole('heading', { name: skill.name })).toBeInTheDocument()
+      expect(screen.getByText(`${skill.osrs} · Level 1`)).toBeInTheDocument()
+    }
   })
 
   it('sends signed-out visitors to sign-in', async () => {

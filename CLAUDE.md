@@ -25,4 +25,4 @@ See [ADR 0002](docs/adr/0002-tech-stack.md) and [ADR 0003](docs/adr/0003-hosting
 - Never run destructive SQL against `fitscape_prod`. Use `fitscape_dev` or `fitscape_test`.
 - Auth follows [ADR 0004](docs/adr/0004-username-pin-authentication.md). Changes to it need a new ADR and a security review.
 - Commits use the GitHub noreply email (repo-local git config), not a personal address.
-- Theming is intentionally minimal until the framework is done.
+- Theme: dark, minimal, one gold accent; tokens live in `frontend/src/index.css`. Reuse them instead of new colors.
