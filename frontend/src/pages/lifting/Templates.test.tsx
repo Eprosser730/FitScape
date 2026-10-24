@@ -18,7 +18,7 @@ const PUSH = {
 describe('Lifting templates', () => {
   it('lists templates with their schedule and targets', async () => {
     mockApi({ status: 200, body: ME }, { status: 200, body: [PUSH] })
-    renderAt('/skills/lifting')
+    renderAt('/skills/lifting?tab=templates')
     const card = (await screen.findByRole('heading', { name: 'Push day' })).closest('li')!
     expect(within(card).getByText('Mon · Wed · Fri')).toBeInTheDocument()
     expect(within(card).getByText('4 × 6–10 reps')).toBeInTheDocument()
@@ -33,7 +33,7 @@ describe('Lifting templates', () => {
       { status: 200, body: [] },
       { status: 201, body: created },
     )
-    renderAt('/skills/lifting')
+    renderAt('/skills/lifting?tab=templates')
     const user = userEvent.setup()
     expect(await screen.findByText(/No templates yet/)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '+ New template' }))
@@ -65,7 +65,7 @@ describe('Lifting templates', () => {
 
   it('needs at least one training day', async () => {
     const fetchMock = mockApi({ status: 200, body: ME }, { status: 200, body: [] })
-    renderAt('/skills/lifting')
+    renderAt('/skills/lifting?tab=templates')
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: '+ New template' }))
     await user.type(screen.getByLabelText('Title'), 'Legs')
@@ -81,7 +81,7 @@ describe('Lifting templates', () => {
       { status: 200, body: [PUSH] },
       { status: 200, body: { ...PUSH, enabled: false } },
     )
-    renderAt('/skills/lifting')
+    renderAt('/skills/lifting?tab=templates')
     const toggle = await screen.findByRole('switch', { name: 'Push day enabled' })
     await userEvent.click(toggle)
     expect(await screen.findByText('Off')).toBeInTheDocument()
@@ -95,7 +95,7 @@ describe('Lifting templates', () => {
       { status: 200, body: [PUSH] },
       { status: 200, body: { ...PUSH, title: 'Push A' } },
     )
-    renderAt('/skills/lifting')
+    renderAt('/skills/lifting?tab=templates')
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: 'Edit' }))
     expect(screen.getByLabelText('Title')).toHaveValue('Push day')
