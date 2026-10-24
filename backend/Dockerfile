@@ -1,6 +1,6 @@
 # FitScape API image. Built and run by infra/docker-compose.yml.
 # Must match backend/.python-version (3.13). Bump both together, never just this line.
-FROM python:3.13.17-slim-trixie
+FROM python:3.15.0-slim-trixie
 
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /usr/local/bin/uv
 # UV_PYTHON_DOWNLOADS=never: a version mismatch fails the build instead of uv fetching a
