@@ -5,4 +5,5 @@ config:
   MD060: false # table pipe spacing: cosmetic only
 ignores:
   - "**/node_modules/**"
+  - "**/.venv/**"
   - "graphify-out/**"
