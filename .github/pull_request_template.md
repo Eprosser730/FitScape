@@ -1,3 +1,4 @@
+<!-- markdownlint-disable-file MD041 -- PR bodies start with a section, not a title -->
 ## Summary
 <!-- What does this PR change, and why? 2–4 sentences. -->
 
@@ -17,12 +18,15 @@ Closes #
 <!-- Required. Critique your own change before merging. -->
 
 ### ✅ What's right
+
 -
 
 ### ⚠️ What's wrong or risky
+
 -
 
 ### 💡 What could be better
+
 -
 
 ### 🧭 Decisions
@@ -30,6 +34,7 @@ Closes #
 -
 
 ## Checklist
+
 - [ ] PR title is a Conventional Commit (`feat: …`, `fix: …`, `docs: …`)
 - [ ] No secrets, credentials, or personal data committed
 - [ ] Docs/ADRs updated if behavior or a decision changed
