@@ -11,6 +11,9 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      # Require a password for every connection. The image's default trusts anything
+      # coming from inside the container (localhost), which silently skips password checks.
+      POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256
       # Passed to db/init/01-databases.sh, which runs once, on first start only.
       FITSCAPE_DEV_PASSWORD: ${FITSCAPE_DEV_PASSWORD:?set in .env}
       FITSCAPE_TEST_PASSWORD: ${FITSCAPE_TEST_PASSWORD:?set in .env}
