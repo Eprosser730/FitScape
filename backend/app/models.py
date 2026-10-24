@@ -3,8 +3,8 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import ARRAY, DateTime, ForeignKey, Numeric, SmallInteger, String, Text, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -66,3 +66,37 @@ class PrayerNote(Base):
     passage: Mapped[str] = mapped_column(String(120))
     summary: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class LiftingTemplate(Base):
+    """A reusable training plan: which exercises, how many sets, and on which weekdays."""
+
+    __tablename__ = "lifting_templates"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(80))
+    weekdays: Mapped[list[int]] = mapped_column(ARRAY(SmallInteger))  # 0 = Monday ... 6 = Sunday
+    enabled: Mapped[bool] = mapped_column(default=True, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    exercises: Mapped[list["TemplateExercise"]] = relationship(
+        order_by="TemplateExercise.position", cascade="all, delete-orphan"
+    )
+
+
+class TemplateExercise(Base):
+    """One exercise in a template: sets of a rep range, or sets of a timed (static) hold."""
+
+    __tablename__ = "template_exercises"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    template_id: Mapped[int] = mapped_column(
+        ForeignKey("lifting_templates.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int]
+    name: Mapped[str] = mapped_column(String(80))
+    sets: Mapped[int]
+    mode: Mapped[str] = mapped_column(String(10))  # "reps" or "seconds"
+    rep_min: Mapped[int | None]
+    rep_max: Mapped[int | None]
+    seconds: Mapped[int | None]
