@@ -40,3 +40,11 @@ updates:
       # One PR per week for all frontend bumps instead of a dozen.
       frontend:
         patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories: [/backend, /frontend]
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    labels: [chore, area:infra]
