@@ -17,7 +17,7 @@ const intervalsLabel = (run: Run) =>
 function SortHeader({ label, col, sort, onSort }: { label: string; col: SortKey; sort: Sort; onSort: (k: SortKey) => void }) {
   const active = sort.key === col
   return (
-    <th scope="col" aria-sort={active ? (sort.desc ? 'descending' : 'ascending') : 'none'} className={col === 'distance' ? 'num' : undefined}>
+    <th scope="col" role="columnheader" aria-sort={active ? (sort.desc ? 'descending' : 'ascending') : 'none'} className={col === 'distance' ? 'num' : undefined}>
       <button type="button" className={active ? 'sort active' : 'sort'} onClick={() => onSort(col)}>
         {label}
         <span aria-hidden="true">{active ? (sort.desc ? ' ▼' : ' ▲') : ' ↕'}</span>
@@ -90,30 +90,36 @@ export default function RunArchive({
         <p className="empty muted">No runs yet. Log one and it lands here.</p>
       ) : (
         <div className="card table-wrap">
-          <table className="run-table">
-            <thead>
-              <tr>
+          {/* Explicit roles: on phones CSS turns rows into cards, and Safari drops table
+              semantics for VoiceOver whenever a table's display is changed. */}
+          <table className="run-table" role="table">
+            <thead role="rowgroup">
+              <tr role="row">
                 <SortHeader label="Date" col="date" sort={sort} onSort={onSort} />
                 <SortHeader label="Distance" col="distance" sort={sort} onSort={onSort} />
-                <th scope="col" className="num">
+                <th scope="col" role="columnheader" className="num">
                   Time
                 </th>
-                <th scope="col">Intervals</th>
-                <th scope="col">Notes</th>
-                <th scope="col">
+                <th scope="col" role="columnheader">Intervals</th>
+                <th scope="col" role="columnheader">Notes</th>
+                <th scope="col" role="columnheader">
                   <span className="visually-hidden">Actions</span>
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup">
               {sorted.map((r) => (
-                <tr key={r.id}>
-                  <td className="nowrap">{formatDay(r.ran_on)}</td>
-                  <td className="num strong">{Number(r.distance_mi).toFixed(2)} mi</td>
-                  <td className="num">{r.segments.length ? formatDuration(totalSeconds(r.segments)) : '—'}</td>
-                  <td className="muted small">{intervalsLabel(r) || '—'}</td>
-                  <td className="notes-cell">{r.notes ?? ''}</td>
-                  <td className="nowrap">
+                <tr key={r.id} role="row">
+                  <td role="cell" className="c-date nowrap">{formatDay(r.ran_on)}</td>
+                  <td role="cell" className="c-dist num strong">{Number(r.distance_mi).toFixed(2)} mi</td>
+                  <td role="cell" className="c-time num" data-empty={!r.segments.length || undefined}>
+                    {r.segments.length ? formatDuration(totalSeconds(r.segments)) : '—'}
+                  </td>
+                  <td role="cell" className="c-int muted small" data-empty={!r.segments.length || undefined}>
+                    {intervalsLabel(r) || '—'}
+                  </td>
+                  <td role="cell" className="c-notes notes-cell">{r.notes ?? ''}</td>
+                  <td role="cell" className="c-act nowrap">
                     <DeleteCell id={r.id} onDelete={remove} />
                   </td>
                 </tr>

@@ -401,9 +401,36 @@ button.danger:hover { background: #c95447; border-color: #c95447; }
   .interval-row span:nth-of-type(2) { grid-column: 3; grid-row: 2; }
   .interval-row input:nth-of-type(2) { grid-column: 4; grid-row: 2; }
   .interval-row span:nth-of-type(3) { grid-column: 5; grid-row: 2; }
-  .run-table { font-size: 0.85rem; }
-  .run-table th, .run-table td { padding: 9px 10px; }
-  .run-table .notes-cell { min-width: 140px; }
+  /* Run archive: each row becomes a card; the header row becomes a "Sort by" bar. */
+  .table-wrap { background: none; border: 0; box-shadow: none; overflow: visible; }
+  .run-table, .run-table tbody { display: block; }
+  .run-table thead tr { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+  .run-table thead tr::before { content: "Sort by"; color: var(--muted); font-size: 0.8rem; margin-right: 4px; }
+  .run-table thead th { display: block; position: static; background: none; border: 0; padding: 0; }
+  .run-table thead th:not([aria-sort]) { display: none; }
+  .run-table thead .sort {
+    padding: 6px 12px; border: 1px solid var(--border-strong); border-radius: 999px; font-size: 0.75rem;
+  }
+  .run-table thead .sort.active { border-color: var(--accent); background: rgb(214 173 92 / 0.08); }
+  .run-table tbody tr {
+    display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: baseline;
+    grid-template-areas: "date dist" "time time" "int int" "notes notes" "act act";
+    margin-bottom: 10px; padding: 14px 16px; position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .run-table tbody tr::before {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: linear-gradient(var(--accent), transparent);
+  }
+  .run-table tbody tr:nth-child(even), .run-table tbody tr:hover { background: var(--surface); }
+  .run-table td { display: block; padding: 0; border: 0; min-width: 0; max-width: none; text-align: left; }
+  .run-table td[data-empty], .run-table td:empty { display: none; }
+  .run-table .c-date { grid-area: date; font-weight: 600; }
+  .run-table .c-dist { grid-area: dist; font-size: 1.25rem; }
+  .run-table .c-time { grid-area: time; text-align: left; }
+  .run-table .c-time::before { content: "Time "; color: var(--muted); font-size: 0.8rem; }
+  .run-table .c-int { grid-area: int; }
+  .run-table .c-notes { grid-area: notes; white-space: pre-wrap; border-left: 2px solid var(--border-strong); padding-left: 10px; }
+  .run-table .c-act { grid-area: act; justify-self: end; }
 }
 
 /* --- Touch screens (iPhone first): finger-sized targets, no zoom-on-tap --- */
