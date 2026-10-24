@@ -1,8 +1,7 @@
 import { render } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { MemoryRouter } from 'react-router'
 import { vi } from 'vitest'
-import Dashboard from './pages/Dashboard'
-import SignIn from './pages/SignIn'
+import { AppRoutes } from './App'
 
 type Reply = { status: number; body?: unknown }
 
@@ -18,13 +17,11 @@ export function mockApi(...replies: Reply[]) {
   return fetchMock
 }
 
+/** Renders the real app routes at `path`, so tests exercise the same layout and guards. */
 export function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/signin" element={<SignIn />} />
-      </Routes>
+      <AppRoutes />
     </MemoryRouter>,
   )
 }
