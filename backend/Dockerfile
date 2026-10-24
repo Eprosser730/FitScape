@@ -1,5 +1,5 @@
 # FitScape API image. Built and run by infra/docker-compose.yml.
-FROM python:3.13.17-slim-trixie
+FROM python:3.14.7-slim-trixie
 
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/app/.venv \
