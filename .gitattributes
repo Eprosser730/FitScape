@@ -1,0 +1,14 @@
+# Normalize line endings: we edit on Windows but run on Linux (Docker).
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files: never touch
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff2 binary
