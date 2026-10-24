@@ -24,7 +24,11 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: { baseURL: 'http://localhost:5173', trace: 'retain-on-failure' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Safari's engine at phone size: most guests will use the app on an iPhone.
+    { name: 'iphone', use: { ...devices['iPhone 15 Pro'] } },
+  ],
   webServer: [
     {
       command: 'uv run alembic upgrade head && uv run uvicorn app.main:app --port 8000',
