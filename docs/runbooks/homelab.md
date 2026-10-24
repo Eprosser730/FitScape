@@ -12,6 +12,7 @@ Where things live and how to operate them. Background: [ADR 0003](../adr/0003-ho
 | Secrets | `/opt/fitscape/infra/.env` (root-only, `chmod 600`, never committed) |
 | Database | PostgreSQL 17 (pinned version, see `infra/docker-compose.yml`), port `5432` on `192.168.68.15` only, data in Docker volume `fitscape_pgdata` |
 | Backups | Proxmox job `nightly-nas` (03:00, all guests) to the Asustor NAS |
+| App | <http://192.168.68.15> (nginx `web` container; the `api` container is internal only), uses `fitscape_prod` |
 
 > ⚠️ **Don't invite guests to the tailnet yet.** The Tailscale subnet router currently exposes the whole home LAN, including port 5432, to every tailnet member. Restrict guests with Tailscale ACLs first (tracked for milestone M3).
 
@@ -85,6 +86,23 @@ cd /opt/fitscape && git pull
 ```
 
 `db/init/` scripts run **only once**, when the data volume is first created. Editing them later changes nothing in the existing database. Schema changes go through Alembic migrations.
+
+## Deploying the app
+
+The `api` (FastAPI) and `web` (nginx + built React app) containers are built from the checkout and run next to `db`.
+`api` applies any new Alembic migrations to `fitscape_prod` every time it starts.
+
+```bash
+cd /opt/fitscape && git pull
+cd infra && docker compose up -d --build   # rebuilds only what changed; db keeps running
+docker compose ps                          # all three should be "healthy" / "running"
+curl -s http://192.168.68.15/api/health    # {"status":"ok"}
+```
+
+- **First time only:** add `PIN_PEPPER` to `infra/.env` (`openssl rand -hex 32`). **Never change or lose it**: every existing PIN would stop working. Keep a copy somewhere safe (e.g. your password manager).
+- **Roll back:** `git switch --detach <previous commit>` then `docker compose up -d --build`. A release that added a migration also needs `docker compose exec api alembic downgrade -1` first (check the migration's `downgrade()`).
+- **Logs:** `docker compose logs -f api web`.
+- The site is plain HTTP for now, so `COOKIE_SECURE` is `false`. When HTTPS is added (e.g. `tailscale serve`), set it to `true` in `docker-compose.yml`.
 
 ## Danger zone
 

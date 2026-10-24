@@ -1,5 +1,5 @@
 # FitScape homelab stack (runs on Proxmox CT 104 "fitscape", 192.168.68.15).
-# Usage (from this folder):  docker compose up -d
+# Usage (from this folder):  docker compose up -d --build
 # Secrets come from ./.env (copy .env.example, fill in real values, chmod 600).
 
 name: fitscape
@@ -33,6 +33,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # The FitScape API (backend/Dockerfile), on the prod database. Not published: only `web` reaches it.
+  api:
+    build: ../backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://fitscape_prod:${FITSCAPE_PROD_PASSWORD}@db:5432/fitscape_prod
+      PIN_PEPPER: ${PIN_PEPPER:?set PIN_PEPPER in .env}
+      # Served over plain HTTP on the LAN/tailnet for now, so the cookie can't be Secure yet.
+      # Flip to "true" once HTTPS is in front (see docs/runbooks/homelab.md).
+      COOKIE_SECURE: "false"
+
+  # nginx serving the built React app and proxying /api to `api` (frontend/Dockerfile).
+  web:
+    build: ../frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "192.168.68.15:80:80"
 
 volumes:
   pgdata:
