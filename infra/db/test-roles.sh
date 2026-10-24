@@ -5,39 +5,47 @@
 #   container  defaults to fitscape-db-1
 #   host       defaults to 127.0.0.1; pass 192.168.68.15 to test over the network path
 #
-# Creates and drops a scratch table in each database. Safe on a fresh stack. On prod it
-# only touches a table named _role_probe, which it removes afterwards.
+# Creates and drops a scratch table in prod named _role_probe, and removes it afterwards.
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
-set -a; . ./.env; set +a
+
+# Load only the four app passwords (not the superuser's), without exporting them.
+env_value() { grep -m1 "^$1=" .env | cut -d= -f2-; }
+DEV_PW=$(env_value FITSCAPE_DEV_PASSWORD)
+TEST_PW=$(env_value FITSCAPE_TEST_PASSWORD)
+PROD_PW=$(env_value FITSCAPE_PROD_PASSWORD)
+RO_PW=$(env_value FITSCAPE_READONLY_PASSWORD)
 
 CONTAINER=${1:-fitscape-db-1}
 HOST=${2:-127.0.0.1}
 pass=0; fail=0
 
+if ! docker exec "$CONTAINER" true 2>/dev/null; then
+  echo "Container $CONTAINER is not running." >&2
+  exit 2
+fi
+
 password_for() {
   case $1 in
-    fitscape_dev) echo "$FITSCAPE_DEV_PASSWORD" ;;
-    fitscape_test) echo "$FITSCAPE_TEST_PASSWORD" ;;
-    fitscape_prod) echo "$FITSCAPE_PROD_PASSWORD" ;;
-    fitscape_readonly) echo "$FITSCAPE_READONLY_PASSWORD" ;;
+    fitscape_dev) echo "$DEV_PW" ;;
+    fitscape_test) echo "$TEST_PW" ;;
+    fitscape_prod) echo "$PROD_PW" ;;
+    fitscape_readonly) echo "$RO_PW" ;;
     *) echo "not-a-real-password" ;;
   esac
 }
 
-run_sql() { # role db sql [password]
-  local password=${4:-$(password_for "$1")}
-  docker exec -e PGPASSWORD="$password" "$CONTAINER" \
-    psql -h "$HOST" -U "$1" -d "$2" -v ON_ERROR_STOP=1 -tAc "$3" 2>&1
-}
-
 check() { # role db sql expect(ok|deny) label [password]
-  local role=$1 db=$2 sql=$3 expect=$4 label=$5 password=${6:-} out got result
-  out=$(run_sql "$role" "$db" "$sql" "$password")
-  if grep -qiE "denied|FATAL|ERROR" <<<"$out"; then got=deny; else got=ok; fi
+  local role=$1 db=$2 sql=$3 expect=$4 label=$5 out got result
+  local password=${6:-$(password_for "$role")}
+  # `-e PGPASSWORD` with no value forwards it from this environment, so it never appears in `ps`.
+  out=$(PGPASSWORD="$password" docker exec -e PGPASSWORD "$CONTAINER" \
+    psql -h "$HOST" -U "$role" -d "$db" -v ON_ERROR_STOP=1 -tAc "$sql" 2>&1)
+  # psql exits 0 on success, non-zero on connection failure or any SQL error.
+  if [ $? -eq 0 ]; then got=ok; else got=deny; fi
   if [ "$got" = "$expect" ]; then pass=$((pass + 1)); result=PASS; else fail=$((fail + 1)); result=FAIL; fi
   printf '%s  %-18s -> %-14s expect %-4s | %s\n' "$result" "$role" "$db" "$expect" "$label"
-  [ "$result" = FAIL ] && printf '      got: %s\n' "$(head -1 <<<"$out")"
+  if [ "$result" = FAIL ]; then printf '      got: %s\n' "$(head -1 <<<"$out")"; fi
 }
 
 echo "Testing $CONTAINER via $HOST"
@@ -50,10 +58,13 @@ done
 
 check fitscape_dev fitscape_dev "select 1" deny "wrong password rejected" "wrong-password"
 check nobody_here fitscape_prod "select 1" deny "unknown user rejected"
+check fitscape_dev postgres "select 1" deny "app role kept out of admin database"
+check fitscape_dev template1 "select 1" deny "app role kept out of template1"
 
-check fitscape_prod fitscape_prod "create table _role_probe(x int); insert into _role_probe values (42)" ok "prod owner can create + insert"
+check fitscape_prod fitscape_prod "create table _role_probe(id serial primary key, x int); insert into _role_probe(x) values (42)" ok "prod owner can create + insert"
 check fitscape_readonly fitscape_prod "select x from _role_probe" ok "readonly reads tables created later"
-check fitscape_readonly fitscape_prod "insert into _role_probe values (1)" deny "readonly cannot insert"
+check fitscape_readonly fitscape_prod "select last_value from _role_probe_id_seq" ok "readonly reads sequences created later"
+check fitscape_readonly fitscape_prod "insert into _role_probe(x) values (1)" deny "readonly cannot insert"
 check fitscape_readonly fitscape_prod "create table _hack(x int)" deny "readonly cannot create tables"
 check fitscape_readonly fitscape_dev "select 1" deny "readonly cannot reach dev"
 check fitscape_prod fitscape_prod "drop table _role_probe" ok "cleanup"
