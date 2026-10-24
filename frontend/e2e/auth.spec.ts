@@ -103,6 +103,7 @@ test('prayer journal: write, reload, expand, delete', async ({ page }) => {
 test('lifting templates: create, switch off, survives reload', async ({ page }) => {
   await signUp(page, unique(), '4826')
   await page.getByRole('link', { name: /Lifting/ }).click()
+  await page.getByRole('button', { name: 'Templates' }).click()
   await page.getByRole('button', { name: '+ New template' }).click()
   await page.getByLabel('Title').fill('Push day')
   await page.getByText('Mon', { exact: true }).click()
@@ -123,4 +124,33 @@ test('lifting templates: create, switch off, survives reload', async ({ page }) 
 
   await page.reload()
   await expect(page.locator('li.template', { hasText: 'Push day' }).getByRole('switch')).not.toBeChecked()
+})
+
+test('log a workout from a template and find it in the archive', async ({ page }) => {
+  await signUp(page, unique(), '4826')
+  await page.getByRole('link', { name: /Lifting/ }).click()
+  await page.getByRole('button', { name: 'Create a template' }).click() // empty-state shortcut
+  await page.getByRole('button', { name: '+ New template' }).click()
+  await page.getByLabel('Title').fill('Full body')
+  for (const day of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) {
+    await page.getByText(day, { exact: true }).click() // every day, so it is always today
+  }
+  await page.getByLabel('Exercise 1 name').fill('Squat')
+  await page.getByLabel('Sets').fill('2')
+  await page.getByRole('button', { name: 'Save template' }).click()
+
+  await page.getByRole('button', { name: 'Log workout' }).click()
+  await expect(page.locator('.log-controls select')).toHaveValue(/\d+/) // preselected
+  await page.getByLabel('Squat set 1 reps').fill('10')
+  await page.getByLabel('Squat set 1 weight in pounds').fill('185')
+  await page.getByLabel('Squat set 2 reps').fill('8')
+  await page.getByLabel('Squat set 2 weight in pounds').fill('205')
+  await expect(page.locator('.log-summary')).toContainText('3,490 lb')
+  await page.getByRole('button', { name: 'Save workout' }).click()
+
+  await expect(page.getByText('Saved Full body.', { exact: false })).toBeVisible()
+  await page.reload()
+  await page.getByText('Full body').click()
+  await expect(page.getByText('10 × 185 lb')).toBeVisible()
+  await expect(page.getByText('8 × 205 lb')).toBeVisible()
 })

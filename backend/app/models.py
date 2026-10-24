@@ -100,3 +100,55 @@ class TemplateExercise(Base):
     rep_min: Mapped[int | None]
     rep_max: Mapped[int | None]
     seconds: Mapped[int | None]
+
+
+class Workout(Base):
+    """One logged training session. Copies names and targets so template edits never rewrite it."""
+
+    __tablename__ = "workouts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    template_id: Mapped[int | None] = mapped_column(
+        ForeignKey("lifting_templates.id", ondelete="SET NULL")
+    )
+    title: Mapped[str] = mapped_column(String(80))
+    performed_on: Mapped[date]
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    exercises: Mapped[list["WorkoutExercise"]] = relationship(
+        order_by="WorkoutExercise.position", cascade="all, delete-orphan"
+    )
+
+
+class WorkoutExercise(Base):
+    __tablename__ = "workout_exercises"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    workout_id: Mapped[int] = mapped_column(
+        ForeignKey("workouts.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int]
+    name: Mapped[str] = mapped_column(String(80))
+    mode: Mapped[str] = mapped_column(String(10))  # "reps" or "seconds"
+    rep_min: Mapped[int | None]
+    rep_max: Mapped[int | None]
+    target_seconds: Mapped[int | None]
+    sets: Mapped[list["WorkoutSet"]] = relationship(
+        order_by="WorkoutSet.set_number", cascade="all, delete-orphan"
+    )
+
+
+class WorkoutSet(Base):
+    """What was actually done: reps and weight, or seconds held (optionally weighted)."""
+
+    __tablename__ = "workout_sets"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    exercise_id: Mapped[int] = mapped_column(
+        ForeignKey("workout_exercises.id", ondelete="CASCADE"), index=True
+    )
+    set_number: Mapped[int]
+    reps: Mapped[int | None]
+    seconds: Mapped[int | None]
+    weight_lb: Mapped[Decimal | None] = mapped_column(Numeric(6, 1))
