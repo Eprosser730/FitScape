@@ -1,0 +1,22 @@
+/* Deliberately plain until theming (see CLAUDE.md). */
+:root {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  color: #1f2328;
+  background: #f6f8fa;
+}
+body { margin: 0; }
+main { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+form { display: grid; gap: 12px; max-width: 320px; }
+label { display: grid; gap: 4px; font-weight: 600; }
+input { font: inherit; padding: 8px; border: 1px solid #8c959f; border-radius: 6px; }
+button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid #8c959f; background: #fff; cursor: pointer; }
+button[type='submit'] { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+button:disabled { opacity: 0.6; cursor: default; }
+.error { color: #b42318; margin: 0; }
+.notice { margin: 0; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; padding: 0; list-style: none; }
+.skills li { background: #fff; border: 1px solid #d0d7de; border-radius: 8px; padding: 12px; }
+.skills h3 { margin: 0 0 4px; font-size: 1rem; }
+.skills p { margin: 0; color: #59636e; }
