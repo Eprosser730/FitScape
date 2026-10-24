@@ -20,3 +20,11 @@ updates:
       # A Postgres major upgrade needs a dump/restore (see docs/runbooks/homelab.md), so never auto-propose one.
       - dependency-name: postgres
         update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: uv
+    directory: /backend
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    labels: [chore, area:backend]
